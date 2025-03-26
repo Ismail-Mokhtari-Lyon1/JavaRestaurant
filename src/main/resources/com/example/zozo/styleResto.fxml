@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.zozo.RestaurantApp"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <VBox spacing="20" alignment="CENTER" padding="20">
+        <!-- Titre principal -->
+        <Label text="Menu Restaurant" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333333; -fx-padding: 10;" />
+
+        <!-- Table des menus -->
+        <TableView fx:id="menuTable" prefWidth="500" prefHeight="300">
+            <columns>
+                <TableColumn text="Menu" prefWidth="150" />
+                <TableColumn text="Items" prefWidth="200" />
+                <TableColumn text="Prix" prefWidth="100" />
+            </columns>
+        </TableView>
+
+        <!-- Statistiques -->
+        <ListView fx:id="statsList" prefHeight="200" prefWidth="500">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Nombre total de commandes : 0"/>
+                    <String fx:value="Menu le plus pris : Aucun menu"/>
+                    <String fx:value="Menu le moins pris : Aucun menu"/>
+                </FXCollections>
+            </items>
+        </ListView>
+
+        <!-- Graphique en barres -->
+        <BarChart fx:id="barChart" prefHeight="200" prefWidth="500">
+            <xAxis>
+                <CategoryAxis />
+            </xAxis>
+            <yAxis>
+                <NumberAxis />
+            </yAxis>
+        </BarChart>
+    </VBox>
+</AnchorPane>
