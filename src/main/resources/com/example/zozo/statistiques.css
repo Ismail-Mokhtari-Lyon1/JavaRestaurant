@@ -1,46 +1,61 @@
 /* Exemple de style professionnel pour votre Dashboard */
-
 /* Racine de la scène */
+/* statistiques.css */
+
+/* Global : fond clair et un encadrement sur le haut et la gauche */
+.root {
+    -fx-background-color: #f0f0f0;
+    -fx-padding: 0;
+}
+
+/* --- Header (zone supérieure) --- */
+/* On utilise ici la classe appliquée à la zone du titre */
+/* Titre principal / Header */
+.title-box {
+    -fx-background-color: #496474;
+    -fx-alignment: center;
+    -fx-padding: 10 0 10 0; /* top=60, right=0, bottom=10, left=0 */
+}
+
+.title-label {
+    -fx-font-size: 50px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+
 .root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
     -fx-background-color: #FAFAFA;
 }
 
-/* Titre principal */
-.title-box {
-    -fx-alignment: center;
-    -fx-padding: 20 0 10 0;
-}
-.title-label {
-    -fx-font-size: 28px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #333;
-}
 
 /* KPI CA Total */
+/* KPI CA Total */
 .kpi-ca {
-
     -fx-font-size: 36px;
     -fx-font-weight: bold;
     -fx-text-fill: #2C3E50;
-    -fx-padding: 0 0 20 0;
+    -fx-padding: 20 0 20 0; /* Ajoute 20px en haut */
     -fx-alignment: center;
 }
 
+
 .header {
  -fx-background-color: #496474;
-     -fx-padding: 20; /* ajustez le padding si besoin */
+     -fx-padding: 100; /* ajustez le padding si besoin */
 
 }
 
 /* Barre latérale (sidebar) */
 .sidebar {
     -fx-background-color: #496474;
-    -fx-padding: 20;
+    -fx-padding: 10;
     -fx-spacing: 20;
     -fx-alignment: top-center;
     -fx-border-color: #EEEEEE;
     -fx-border-width: 0 2px 0 0;
+    -fx-left:0;
 }
 .sidebar-label {
     -fx-font-size: 16px;

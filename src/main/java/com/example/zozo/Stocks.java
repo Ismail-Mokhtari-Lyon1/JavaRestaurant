@@ -1,14 +1,12 @@
 package com.example.zozo;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -75,6 +73,7 @@ public class Stocks {
         // Création du TableView
         TableView<StockItem> table = new TableView<>();
         table.setItems(data);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Colonne 1 : Ingrédient
         TableColumn<StockItem, String> colIngredient = new TableColumn<>("Ingrédient");
@@ -91,7 +90,7 @@ public class Stocks {
         colInitial.setCellValueFactory(new PropertyValueFactory<>("initialStock"));
         colInitial.setMinWidth(100);
 
-        // Colonne 4 : Stock final (fond vert clair)
+        // Colonne 4 : Stock final (avec fond vert clair)
         TableColumn<StockItem, Integer> colFinal = new TableColumn<>("Stock final");
         colFinal.setCellValueFactory(new PropertyValueFactory<>("finalStock"));
         colFinal.setMinWidth(100);
@@ -111,21 +110,43 @@ public class Stocks {
 
         table.getColumns().addAll(colIngredient, colConsumed, colInitial, colFinal);
 
+        // Ajuster dynamiquement la hauteur du tableau en fonction du nombre de lignes
+        double fixedCellSize = 30;
+        table.setFixedCellSize(fixedCellSize);
+        table.prefHeightProperty().bind(
+                Bindings.size(table.getItems()).multiply(fixedCellSize).add(28)
+        );
+
         // Bouton Retour
         Button backButton = new Button("Retour");
-        backButton.getStyleClass().add("dashboard-button");
+        backButton.setStyle("-fx-background-color: #007ACC; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20;");
         backButton.setOnAction(e -> onBack.run());
         HBox buttonBox = new HBox(backButton);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(20));
 
-        VBox vbox = new VBox(20, table, buttonBox);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setPadding(new Insets(20));
+        // Création du header pour la page Stocks
+        Label headerTitle = new Label("Gestion des Stocks");
+        headerTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: white;");
+        HBox headerBox = new HBox(headerTitle);
+        headerBox.setStyle("-fx-background-color: #007ACC; -fx-padding: 20;");
+        headerBox.setAlignment(Pos.CENTER);
 
-        Scene scene = new Scene(vbox, 800, 600);
-        scene.getStylesheets().add(Stocks.class.getResource("statistiques.css").toExternalForm());
+        // Organisation globale du layout dans un VBox
+        VBox mainContent = new VBox(20, headerBox, table, buttonBox);
+        mainContent.setAlignment(Pos.CENTER);
+        mainContent.setPadding(new Insets(20));
+        mainContent.setStyle("-fx-background-color: #F8F8F8; -fx-border-color: #CCCCCC; -fx-border-width: 1; -fx-border-radius: 5;");
+
+        // Envelopper mainContent dans un ScrollPane pour le défilement
+        ScrollPane scrollPane = new ScrollPane(mainContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPadding(new Insets(10));
+
+        Scene scene = new Scene(scrollPane, 700, 1200);
+
         return scene;
+
     }
 
     // Classe modèle pour représenter un item de stock

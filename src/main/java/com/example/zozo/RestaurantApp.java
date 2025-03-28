@@ -1,6 +1,7 @@
 package com.example.zozo;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,9 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -39,6 +38,20 @@ public class RestaurantApp extends Application {
     }
 
     public void showRecapScene(Stage primaryStage, String role) {
+        // --- Création du titre ---
+        Label globalTitle = new Label("Récapitulatif des Commandes");
+        globalTitle.setStyle("-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: white;");
+        HBox titleBox = new HBox(globalTitle);
+        titleBox.setStyle("-fx-alignment: center;");
+        HBox.setHgrow(titleBox, Priority.ALWAYS);
+        titleBox.setAlignment(Pos.CENTER);
+
+        // --- Création de l'en-tête horizontal (header) ---
+        HBox header = new HBox();
+        header.setStyle("-fx-background-color: #007ACC; -fx-padding: 20;");
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.getChildren().addAll(titleBox);
+
         // Initialisation des menus et commandes
         menus.clear();
         commandes.clear();
@@ -75,12 +88,14 @@ public class RestaurantApp extends Application {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", java.util.Locale.FRENCH);
         String formattedDate = currentDate.format(dateFormatter);
         Label dateLabel = new Label(formattedDate);
-        dateLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        dateLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;");
         HBox topBar = new HBox(dateLabel);
         topBar.setAlignment(Pos.TOP_LEFT);
+        topBar.setPadding(new Insets(10, 0, 10, 0));
 
-        // Création d'une TableView pour afficher les commandes
+        // Création de la TableView pour afficher les commandes
         TableView<CommandeAffichee> commandesTable = new TableView<>();
+        commandesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         ObservableList<CommandeAffichee> commandesData = FXCollections.observableArrayList();
 
         for (Commande cmd : commandes) {
@@ -90,7 +105,10 @@ public class RestaurantApp extends Application {
             for (Menu m : cmd.getItems()) {
                 menusCommande.append(m.getName()).append(" | ");
             }
-            // Ici, on utilise la classe CommandeAffichee et non Commande
+            // Retirer le dernier séparateur " | "
+            if (menusCommande.length() > 3) {
+                menusCommande.setLength(menusCommande.length() - 3);
+            }
             commandesData.add(new CommandeAffichee(heure, menusCommande.toString(), String.format("%.2f €", total)));
         }
 
@@ -108,11 +126,18 @@ public class RestaurantApp extends Application {
 
         commandesTable.getColumns().addAll(heureCol, menusCol, totalCol);
         commandesTable.setItems(commandesData);
+        commandesTable.setPlaceholder(new Label("Aucune commande disponible"));
+
+        // Ajuster dynamiquement la hauteur du tableau en fonction du nombre de commandes
+        double fixedCellSize = 35;
+        commandesTable.setFixedCellSize(fixedCellSize);
+        commandesTable.prefHeightProperty().bind(Bindings.size(commandesTable.getItems()).multiply(fixedCellSize).add(28));
 
         // Zone texte récapitulative affichant le montant total par commande
         TextArea totalCommandesText = new TextArea();
         totalCommandesText.setEditable(false);
         totalCommandesText.setPrefHeight(100);
+        totalCommandesText.setStyle("-fx-font-size: 14px; -fx-background-color: #FFFFFF; -fx-border-color: #CCCCCC;");
         StringBuilder recap = new StringBuilder("Montant total par commande :\n");
         int index = 1;
         for (Commande cmd : commandes) {
@@ -123,33 +148,42 @@ public class RestaurantApp extends Application {
         }
         totalCommandesText.setText(recap.toString());
 
-        // Boutons en bas : Retour à la connexion (pour tous) et Statistiques (pour le gérant)
+        // Boutons en bas : Retour à la connexion et Statistiques (si rôle gérant)
         Button retourButton = new Button("Retour à la connexion");
+        retourButton.setStyle("-fx-background-color: #007ACC; -fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-padding: 10 20;");
         retourButton.setOnAction(e -> {
             primaryStage.setScene(Connexion.getLoginScene(primaryStage, r -> showRecapScene(primaryStage, r)));
             primaryStage.setTitle("Connexion");
         });
         HBox bottomButtons = new HBox(10, retourButton);
         bottomButtons.setAlignment(Pos.CENTER);
+        bottomButtons.setPadding(new Insets(10, 0, 10, 0));
 
         if (role.equalsIgnoreCase("gerant")) {
             Button statsButton = new Button("Statistiques");
+            statsButton.setStyle("-fx-background-color: #007ACC; -fx-text-fill: #FFFFFF; -fx-font-weight: bold; -fx-padding: 10 20;");
             statsButton.setOnAction(e -> {
-                // Accès à la page Statistiques
                 primaryStage.setScene(Statistiques.getStatScene(primaryStage, () -> showRecapScene(primaryStage, role)));
                 primaryStage.setTitle("Statistiques");
             });
             bottomButtons.getChildren().add(statsButton);
         }
 
-        VBox vbox = new VBox(20, topBar, commandesTable, totalCommandesText, bottomButtons);
-        vbox.setPadding(new Insets(15));
+        // Ajout du header en haut du layout principal
+        VBox mainContent = new VBox(20, header, topBar, commandesTable, totalCommandesText, bottomButtons);
+        mainContent.setPadding(new Insets(15));
+        mainContent.setStyle("-fx-background-color: #F8F8F8; -fx-border-color: #CCCCCC; -fx-border-width: 1; -fx-border-radius: 5;");
 
-        StackPane root = new StackPane(vbox);
-        Scene recapScene = new Scene(root, 700, 500);
+        // Envelopper mainContent dans un ScrollPane
+        ScrollPane scrollPane = new ScrollPane(mainContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPadding(new Insets(10));
+
+        Scene recapScene = new Scene(scrollPane, 700, 500);
         primaryStage.setScene(recapScene);
         primaryStage.setTitle("Récapitulatif des Commandes");
     }
+
 
     // Classe interne pour représenter une commande dans la TableView
     public static class CommandeAffichee {

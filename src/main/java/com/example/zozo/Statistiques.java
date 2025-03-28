@@ -18,35 +18,28 @@ import java.util.*;
 public class Statistiques {
 
     public static Scene getStatScene(Stage primaryStage, Runnable onBack) {
-        // --- Création de la sidebar (filtre "Afficher par") ---
-        Label sidebarLabel = new Label("Afficher par :");
-        sidebarLabel.getStyleClass().add("sidebar-label");
-        ComboBox<String> afficherParCombo = new ComboBox<>();
-        afficherParCombo.getItems().addAll("Jour", "Semaine", "Mois");
-        afficherParCombo.setValue("Jour");
-        afficherParCombo.getStyleClass().add("sidebar-combo");
-        VBox sidebar = new VBox(20, sidebarLabel, afficherParCombo);
-        sidebar.getStyleClass().add("sidebar");
-        sidebar.setAlignment(Pos.CENTER);
-        sidebar.setPrefWidth(200);
-
-        // --- Création du titre ---
         // --- Création du titre ---
         Label globalTitle = new Label("Dashboard Statistiques");
         globalTitle.getStyleClass().add("title-label");
         HBox titleBox = new HBox(globalTitle);
         titleBox.getStyleClass().add("title-box");
-// On force le titre à prendre tout l'espace disponible à droite de la sidebar
         HBox.setHgrow(titleBox, Priority.ALWAYS);
         titleBox.setAlignment(Pos.CENTER);
 
-// --- Création de l'en-tête horizontal (header) ---
-        HBox header = new HBox();
-        header.setStyle("-fx-background-color: #007ACC; -fx-padding: 20;");  // Vous pouvez aussi définir cela dans le CSS
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setSpacing(20);
-        header.getChildren().addAll(sidebar, titleBox);
+        // --- Création du filtre, placé sous le titre ---
+        Label filterLabel = new Label("Afficher par :");
+        filterLabel.getStyleClass().add("sidebar-label");
+        ComboBox<String> afficherParCombo = new ComboBox<>();
+        afficherParCombo.getItems().addAll("Jour", "Semaine", "Mois");
+        afficherParCombo.setValue("Jour");
+        afficherParCombo.getStyleClass().add("sidebar-combo");
+        VBox filterBox = new VBox(10, filterLabel, afficherParCombo);
+        filterBox.setAlignment(Pos.CENTER);
 
+        // --- Création du header complet (titre + filtre en dessous) ---
+        VBox header = new VBox(10, titleBox, filterBox);
+        header.setStyle("-fx-background-color: #496474; -fx-padding: 20;");
+        header.setAlignment(Pos.CENTER);
 
         // === KPI CA Total (mis en évidence) ===
         Label totalRevenueLabel = new Label("CA Total : 0,00 €");
@@ -105,15 +98,16 @@ public class Statistiques {
         LineChart<String, Number> hourlyChart = new LineChart<>(hourXAxis, hourYAxis);
         hourlyChart.getStyleClass().addAll("chart", "line-chart");
         hourlyChart.setTitle("Commandes par tranche horaire");
+        hourlyChart.setLegendVisible(false);
         hourlyChart.setPrefWidth(600);
 
         // Filtre pour le graphique horaire (ComboBox "Tous", "Menu 1", "Menu 2", "Menu 3", "Menu 4")
-        Label filterLabel = new Label("Filtrer hourly par menu :");
+        Label hourlyFilterLabel = new Label("Filtrer hourly par menu :");
         ComboBox<String> menuFilterComboBox = new ComboBox<>();
         menuFilterComboBox.getItems().addAll("Tous", "Menu 1", "Menu 2", "Menu 3", "Menu 4");
         menuFilterComboBox.setValue("Tous");
 
-        HBox hourlyFilterBox = new HBox(10, filterLabel, menuFilterComboBox);
+        HBox hourlyFilterBox = new HBox(10, hourlyFilterLabel, menuFilterComboBox);
         hourlyFilterBox.setAlignment(Pos.TOP_RIGHT);
         hourlyFilterBox.setPadding(new Insets(0, 10, 10, 0));
 
@@ -128,6 +122,7 @@ public class Statistiques {
         BarChart<String, Number> basketChart = new BarChart<>(basketXAxis, basketYAxis);
         basketChart.getStyleClass().addAll("chart", "bar-chart");
         basketChart.setTitle("Panier moyen");
+        basketChart.setLegendVisible(false);
         basketChart.setPrefWidth(600);
 
         // === Boutons en bas ===
@@ -148,16 +143,17 @@ public class Statistiques {
 
         // Assemblage global dans un BorderPane
         BorderPane mainPane = new BorderPane();
-        VBox topBox = new VBox(0, titleBox, revenueBox);
+        // Le header (titre + filtre en dessous) et le KPI CA sont en haut
+        VBox topBox = new VBox(0, header, revenueBox);
         topBox.setAlignment(Pos.CENTER);
         mainPane.setTop(topBox);
-        mainPane.setLeft(sidebar); // Le filtre "Afficher par" est ici dans la région gauche
+        // Le contenu central reste dans le centre
         VBox centerBox = new VBox(20, contentMain);
         centerBox.setAlignment(Pos.TOP_CENTER);
         mainPane.setCenter(centerBox);
-        BorderPane.setMargin(sidebar, new Insets(20));
         BorderPane.setMargin(centerBox, new Insets(20));
 
+        // Envelopper mainPane dans un ScrollPane pour le défilement
         ScrollPane scrollPane = new ScrollPane(mainPane);
         scrollPane.getStyleClass().add("scroll-pane");
         scrollPane.setFitToWidth(true);
@@ -190,10 +186,9 @@ public class Statistiques {
         updateHourlyChart(hourlyChart, afficherParCombo.getValue(), menuFilterComboBox.getValue());
         updateBasketChart(basketChart, afficherParCombo.getValue());
 
-        Scene scene = new Scene(scrollPane, 1000, 900);
+        Scene scene = new Scene(scrollPane, 700, 1200);
         scene.getStylesheets().add(Statistiques.class.getResource("statistiques.css").toExternalForm());
         scrollPane.getStyleClass().add("root");
-
         return scene;
     }
 
